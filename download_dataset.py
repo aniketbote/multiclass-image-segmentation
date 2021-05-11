@@ -8,6 +8,11 @@ import numpy as np
 import pandas as pd
 import uuid
 
+if 'train' not in os.listdir('data'):
+    os.mkdir('data/train')
+if 'test' not in os.listdir('data'):
+    os.mkdir('data/test')
+
 dataset, info = tfds.load('oxford_iiit_pet:3.*.*', with_info=True, data_dir = 'data')
 
 data_config = {}
@@ -15,6 +20,7 @@ data_config['train_len'] = info.splits['train'].num_examples
 data_config['test_len'] = info.splits['test'].num_examples
 data_config['num_classes'] = info.features['species'].num_classes + 1
 data_config['color_map'] = {0:[255, 0, 0], 1:[0,255,0], 2:[0,0,0]}
+
 f = open('data/config.json', 'w')
 f.write(json.dumps(data_config))
 f.close()

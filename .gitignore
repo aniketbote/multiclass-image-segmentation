@@ -3,6 +3,7 @@ data/
 outputs/
 
 temp-delete.ipynb
+best_model.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

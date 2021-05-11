@@ -1,20 +1,26 @@
 import tensorflow as tf
 
 class CustomWeightedCategoricalCrossentropy(tf.keras.losses.Loss):
-    def __init__(self, class_weights, epsilon = 1e-9, name = 'wce'):
-        super().__init__(name=name)
+    def __init__(self, class_weights, epsilon = 1e-9, name = 'wce', **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.params = {'class_weights':class_weights, 'epsilon':epsilon}
         self.class_weights = tf.convert_to_tensor(class_weights, tf.float32)
         self.epsilon = epsilon
     def call(self, y_true, y_pred):
         y_true = tf.convert_to_tensor(y_true, tf.float32)
         y_pred = tf.convert_to_tensor(y_pred, tf.float32)
         return -tf.reduce_mean(tf.reduce_sum(self.class_weights* y_true* tf.math.log(y_pred + self.epsilon), axis = [-1]))
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
 
 
 class CustomMyDiceLoss(tf.keras.losses.Loss):
-    def __init__(self, smooth = 1.0 ,name = 'my_dice_loss'):
-        super().__init__(name = name)
+    def __init__(self, smooth = 1.0 ,name = 'my_dice_loss', **kwargs):
+        super().__init__(name = name, **kwargs)
         self.smooth = smooth
+        self.params = {'smooth':smooth}
 
     def compute_dice_coef(self, y_true, y_pred):
         intersection = tf.reduce_sum(y_true * y_pred, axis=[1,2])
@@ -27,11 +33,16 @@ class CustomMyDiceLoss(tf.keras.losses.Loss):
         y_pred = tf.convert_to_tensor(y_pred, tf.float32)
         score  = self.compute_dice_coef(y_true, y_pred)
         return 1 - score
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
 
 class CustomDiceLoss(tf.keras.losses.Loss):
-    def __init__(self, smooth = 1.0 ,name = 'dice_loss'):
-        super().__init__(name = name)
+    def __init__(self, smooth = 1.0 ,name = 'dice_loss', **kwargs):
+        super().__init__(name = name, **kwargs)
         self.smooth = smooth
+        self.params = {'smooth':smooth}
 
     def compute_dice_coef(self, y_true, y_pred):
         intersection = tf.reduce_sum(y_true * y_pred, axis=[1,2,3])
@@ -44,14 +55,19 @@ class CustomDiceLoss(tf.keras.losses.Loss):
         y_pred = tf.convert_to_tensor(y_pred, tf.float32)
         score  = self.compute_dice_coef(y_true, y_pred)
         return 1 - score
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
 
 
 
 class CustomTverskyLoss(tf.keras.losses.Loss):
-    def __init__(self, alpha = 0.7, smooth = 1.0 ,name = 'tversky_loss'):
-        super().__init__(name = name)
+    def __init__(self, alpha = 0.7, smooth = 1.0 ,name = 'tversky_loss', **kwargs):
+        super().__init__(name = name, **kwargs)
         self.smooth = smooth
         self.alpha = alpha
+        self.params = {'smooth':smooth, 'alpha':alpha}
 
     def compute_tversky_index(self, y_true, y_pred):
         true_pos = tf.reduce_sum(y_true * y_pred)
@@ -66,14 +82,21 @@ class CustomTverskyLoss(tf.keras.losses.Loss):
         y_pred = tf.convert_to_tensor(y_pred, tf.float32)
         score  = self.compute_tversky_index(y_true, y_pred)
         return 1 - score
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
         
 
 class CustomFocalTverskyLoss(tf.keras.losses.Loss):
-    def __init__(self, alpha = 0.7, gamma = 0.75, smooth = 1.0 ,name = 'focal_tversky'):
-        super().__init__(name = name)
+    def __init__(self, alpha = 0.7, gamma = 0.75, smooth = 1.0 ,name = 'focal_tversky', **kwargs):
+        super().__init__(name = name, **kwargs)
         self.smooth = smooth
         self.gamma = gamma
         self.alpha = alpha
+        self.params = {'smooth':smooth, 'alpha':alpha, 'gamma':gamma}
+
 
     def compute_tversky_index(self, y_true, y_pred):
         true_pos = tf.reduce_sum(y_true * y_pred)
@@ -89,12 +112,18 @@ class CustomFocalTverskyLoss(tf.keras.losses.Loss):
         score  = self.compute_tversky_index(y_true, y_pred)
         return tf.pow(1-score, self.gamma)
 
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
+
 
 
 class CustomLogDiceLoss(tf.keras.losses.Loss):
-    def __init__(self, smooth = 1.0 ,name = 'log_dice_loss'):
-        super().__init__(name = name)
+    def __init__(self, smooth = 1.0 ,name = 'log_dice_loss', **kwargs):
+        super().__init__(name = name, **kwargs)
         self.smooth = smooth
+        self.params = {'smooth':smooth}
 
     def compute_dice_coef(self, y_true, y_pred):
         intersection = tf.reduce_sum(y_true * y_pred, axis=[1,2,3])
@@ -107,6 +136,11 @@ class CustomLogDiceLoss(tf.keras.losses.Loss):
         y_pred = tf.convert_to_tensor(y_pred, tf.float32)
         score  = self.compute_dice_coef(y_true, y_pred)
         return tf.math.log((tf.exp(1-score) + tf.exp(-(1-score))) / 2.0)
+        
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
         
 
         

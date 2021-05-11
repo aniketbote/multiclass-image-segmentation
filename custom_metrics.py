@@ -4,6 +4,7 @@ import tensorflow as tf
 class CustomIOU(tf.keras.metrics.Metric):
     def __init__(self, n_classes, threshold = None, smooth= 1.0, average='macro', weight = None, name = 'weighted_iou', **kwargs):
         super().__init__(name = name, **kwargs)
+        self.params = {'n_classes':n_classes, 'threshold':threshold, 'smooth':smooth, 'average':average, 'weight':weight}
         self.n_classes = n_classes
         self.smooth = smooth
         self.threshold = threshold
@@ -34,16 +35,26 @@ class CustomIOU(tf.keras.metrics.Metric):
             self.h_iou.assign(tf.math.divide_no_nan(tf.reduce_sum(self.weight), tf.reduce_sum(tf.math.divide_no_nan( self.weight, tf.math.divide_no_nan(self.sum, self.total) ))))
         elif self.average == 'micro':
             self.h_iou.assign( tf.reduce_mean(self.weight * tf.math.divide_no_nan(self.sum, self.total)) )
+        elif self.average is None:
+            pass
         else:
             raise NameError
         
     def result(self):
-        return self.h_iou
+        if self.average is None:
+            return self.sum / self.total
+        else:
+            return self.h_iou
     
-    def reset_states(self):
+    def reset_state(self):
         self.sum.assign(self.sum * 0.0)
         self.total.assign(0.0)
         self.h_iou.assign(0.0)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(self.params)
+        return config
 
 
 if __name__ == "__main__":
